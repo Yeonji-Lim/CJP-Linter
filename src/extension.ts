@@ -19,7 +19,29 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from cjp-linter!');
 	});
 
+	let cLinter = vscode.commands.registerCommand('cjp-linter.cLinter', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('C Linter from cjp-linter!');
+	});
+
+	let javaLinter = vscode.commands.registerCommand('cjp-linter.javaLinter', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('JAVA Linter from cjp-linter!');
+	});
+
+	let pythonLinter = vscode.commands.registerCommand('cjp-linter.pythonLinter', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('Python Linter from cjp-linter!');
+	});
+
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(cLinter);
+	context.subscriptions.push(javaLinter);
+	context.subscriptions.push(pythonLinter);
+
 }
 
 // this method is called when your extension is deactivated
