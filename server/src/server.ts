@@ -21,17 +21,18 @@ import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
-// Create a connection for the server, using Node's IPC as a transport.
+// 서버를 위한 연결 생성 : Node의 IPC 모듈 사용
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
-// Create a simple text document manager.
+// 문서 매니저 생성
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
 
+// 초기화
 connection.onInitialize((params: InitializeParams) => {
 	const capabilities = params.capabilities;
 
@@ -80,7 +81,6 @@ connection.onInitialized(() => {
 	}
 });
 
-// The example settings
 interface ExampleSettings {
 	maxNumberOfProblems: number;
 }
@@ -91,13 +91,18 @@ interface ExampleSettings {
 const defaultSettings: ExampleSettings = { maxNumberOfProblems: 1000 };
 let globalSettings: ExampleSettings = defaultSettings;
 
-// Cache the settings of all open documents
+// 진단을 진행할 패턴 목록
+const patternList: RegExp[] = [
+	/\b[A-Z]{2,}\b/g
+];
+
+// 열려있는 모든 문서의 설정 캐시
 const documentSettings: Map<string, Thenable<ExampleSettings>> = new Map();
 
 // 구성 변경에 대한 알림 핸들러 연결
 connection.onDidChangeConfiguration(change => {
 	if (hasConfigurationCapability) {
-		// Reset all cached document settings
+		// 문서 설정 초기화
 		documentSettings.clear();
 	} else {
 		globalSettings = <ExampleSettings>(
@@ -105,10 +110,11 @@ connection.onDidChangeConfiguration(change => {
 		);
 	}
 
-	// Revalidate all open text documents
+	// 서버사이드에서 configuration 변경을 확인하고 설정이 변경되었다면 열려있는 문서를 다시 validate
 	documents.all().forEach(validateTextDocument);
 });
 
+// 문서 설정 가져오기
 function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	if (!hasConfigurationCapability) {
 		return Promise.resolve(globalSettings);
@@ -117,125 +123,85 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	if (!result) {
 		result = connection.workspace.getConfiguration({
 			scopeUri: resource,
-			section: 'languageServerExample'
+			section: 'cjpLinter'
 		});
 		documentSettings.set(resource, result);
 	}
 	return result;
 }
 
-// Only keep settings for open documents
+
+// 문서가 닫히면 해당 문서는 문서 설정에서 삭제
 documents.onDidClose(e => {
 	documentSettings.delete(e.document.uri);
 });
 
-// The content of a text document has changed. This event is emitted
-// when the text document first opened or when its content has changed.
+// 텍스트 문서가 처음 열리거나 그 내용이 수정될 때 호출됨
 documents.onDidChangeContent(async change => {
 	const textDocument = change.document;
-	// In this simple example we get the settings for every validate run.
-	const settings = await getDocumentSettings(textDocument.uri);
-
-	// The validator creates diagnostics for all uppercase words length 2 and more
-	const text = textDocument.getText();
-	const pattern = /\b[A-Z]{2,}\b/g;
-	let m: RegExpExecArray | null;
-
-	let problems = 0;
-	const diagnostics: Diagnostic[] = [];
-	while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-		problems++;
-		const diagnostic: Diagnostic = {
-			severity: DiagnosticSeverity.Warning,
-			range: {
-				start: textDocument.positionAt(m.index),
-				end: textDocument.positionAt(m.index + m[0].length)
-			},
-			message: `${m[0]} is all uppercase.`,
-			source: 'ex'
-		};
-		if (hasDiagnosticRelatedInformationCapability) {
-			diagnostic.relatedInformation = [
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnostic.range)
-					},
-					message: 'Spelling matters'
-				},
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnostic.range)
-					},
-					message: 'Particularly for names'
-				}
-			];
-		}
-		diagnostics.push(diagnostic);
-	}
-
-	// Send the computed diagnostics to VS Code.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+	validateTextDocument(textDocument);
 });
 
-// 서버사이드에서 configuration 변경을 확인하고 설정이 변경되었다면 열려있는 문서를 다시 validate
+// 문서를 주어진 패턴으로 진단
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// In this simple example we get the settings for every validate run.
 	const settings = await getDocumentSettings(textDocument.uri);
 
-	// The validator creates diagnostics for all uppercase words length 2 and more
+	// The validator creates diagnostics
 	const text = textDocument.getText();
-	const pattern = /\b[A-Z]{2,}\b/g;
 	let m: RegExpExecArray | null;
 
 	let problems = 0;
 	const diagnostics: Diagnostic[] = [];
-	// 보고된 문제의 최대 수 제어 maxNumberOfProblems를 지키도록 함
-	while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-		problems++;
-		const diagnostic: Diagnostic = {
-			severity: DiagnosticSeverity.Warning,
-			range: {
-				start: textDocument.positionAt(m.index),
-				end: textDocument.positionAt(m.index + m[0].length)
-			},
-			message: `${m[0]} is all uppercase.`,
-			source: 'ex'
-		};
-		if (hasDiagnosticRelatedInformationCapability) {
-			diagnostic.relatedInformation = [
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnostic.range)
-					},
-					message: 'Spelling matters'
-				},
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnostic.range)
-					},
-					message: 'Particularly for names'
-				}
-			];
-		}
-		diagnostics.push(diagnostic);
-	}
 
-	// Send the computed diagnostics to VS Code.
+	for(const pattern of patternList) {
+		while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
+			problems++;
+			// severity - 심각성 정도, range - 해당 문제 범위, message - 출력 문구
+			const diagnostic: Diagnostic = {
+				severity: DiagnosticSeverity.Warning,
+				range: {
+					start: textDocument.positionAt(m.index),
+					end: textDocument.positionAt(m.index + m[0].length)
+				},
+				message: `${m[0]} is all uppercase.`,
+				source: 'ex'
+			};
+			if (hasDiagnosticRelatedInformationCapability) {
+				diagnostic.relatedInformation = [
+					{
+						location: {
+							uri: textDocument.uri,
+							range: Object.assign({}, diagnostic.range)
+						},
+						message: 'Spelling matters'
+					},
+					{
+						location: {
+							uri: textDocument.uri,
+							range: Object.assign({}, diagnostic.range)
+						},
+						message: 'Particularly for names'
+					}
+				];
+			}
+			// 진단 목록에 삽입
+			diagnostics.push(diagnostic);
+		}
+	}
+	
+	// 진단들을 연결로 다시 보냄
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
+// 파일 변경 감지
 connection.onDidChangeWatchedFiles(_change => {
-	// Monitored files have change in VSCode
 	connection.console.log('We received an file change event');
 });
 
-// This handler provides the initial list of the completion items.
+// completion item들의 초기 리스트 제공
 connection.onCompletion(
-	(_textDocumentPosition:  TextDocumentPositionParams): CompletionItem[] => {
+	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the example we ignore this
 		// info and always provide the same completion items.
@@ -257,9 +223,6 @@ connection.onCompletion(
 	}
 );
 
-// This handler resolves additional information for the item selected in
-// the completion list.
-
 // completion list에서 선택된 아이템에 대한 부가적인 정보를 제공한다.
 connection.onCompletionResolve(
 	(item: CompletionItem): CompletionItem => {
@@ -274,9 +237,7 @@ connection.onCompletionResolve(
 	}
 );
 
-// Make the text document manager listen on the connection
-// for open, change and close text document events
+// document manager : 문서의 열기, 수정, 닫기 이벤트 listen
 documents.listen(connection);
 
-// Listen on the connection
 connection.listen();
