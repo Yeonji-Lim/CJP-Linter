@@ -1,4 +1,4 @@
-# LSP Example
+# CJP Linter
 
 Heavily documented sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
 
