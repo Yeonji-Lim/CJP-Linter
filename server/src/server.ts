@@ -95,7 +95,8 @@ let globalSettings: ExampleSettings = defaultSettings;
 
 // 진단을 진행할 패턴 목록
 const patternList: RegExp[] = [
-	/\b[A-Z]{2,}\b/g
+	/\b[A-Z]{2,}\b/g,
+	/\s{2,}/g
 ];
 
 function exportTestFunc(): void {
@@ -169,14 +170,12 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// The validator creates diagnostics
 	const text = textDocument.getText();
 
-	// diagnosticCollection = vscode.language.createDiagnosticCollection('java');
-
-
 	let m: RegExpExecArray | null;
 
 	let problems = 0;
 	const diagnostics: Diagnostic[] = [];
 
+	// 패턴 목록에서 패턴 가져와서 비교
 	for(const pattern of patternList) {
 		while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
 			problems++;

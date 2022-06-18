@@ -3,6 +3,8 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
+// 주석으로 가려진 코드는 linter-vscode 도입을 위한 코드
+
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
 import * as vscode from 'vscode';
@@ -14,10 +16,89 @@ import {
 	TransportKind
 } from 'vscode-languageclient/node';
 
+// import { debounce } from "lodash";
+// import { LinterOffense } from "vscode-linter-api";
+// import { CodeActionProvider } from "./CodeActionProvider";
+// import { run, fix, fixInline, ignore } from "./linters/run";
+// import { getEditor } from "./helpers/getEditor";
+
 let client: LanguageClient;
 let diagnosticCollection: vscode.DiagnosticCollection;
 
 export function activate(context: ExtensionContext) {
+
+	// const runLinters = debounce(run, 200);
+	// const runFix = debounce(fix, 200);
+	// const runIgnore = debounce(ignore, 200);
+	// const { subscriptions } = context;
+	// const offenses: LinterOffense[] = [];
+	// const diagnostics = vscode.languages.createDiagnosticCollection("linter");
+	// const codeActionProvider = new CodeActionProvider(diagnostics, offenses);
+
+	// // Diagnostics code ----------------------------------------------------------
+	// if (vscode.window.activeTextEditor) {
+	// 	runLinters(vscode.window.activeTextEditor.document, diagnostics, offenses);
+	// }
+
+	// subscriptions.push(
+	// 	vscode.window.onDidChangeActiveTextEditor((editor) => {
+	// 		if (editor) {
+	// 			runLinters(editor.document, diagnostics, offenses);
+	// 		}
+	// 	}),
+	// );
+
+	// subscriptions.push(
+	// 	vscode.workspace.onDidChangeTextDocument(({ document }) => {
+	// 		runLinters(document, diagnostics, offenses);
+	// 	}),
+	// );
+
+	// // CodeAction code -----------------------------------------------------------
+	// subscriptions.push(
+	// 	vscode.languages.registerCodeActionsProvider("*", codeActionProvider),
+	// );
+
+	// subscriptions.push(
+	// 	vscode.commands.registerCommand(
+	// 		"linter.fix",
+	// 		(offense: LinterOffense, type: string) => {
+	// 			const editor = getEditor(offense.uri);
+
+	// 			if (editor) {
+	// 				runFix(offense, editor, type);
+	// 			}
+	// 		},
+	// 	),
+	// );
+
+	// subscriptions.push(
+	// 	vscode.commands.registerCommand(
+	// 		"linter.fixInline",
+	// 		(offense: LinterOffense) => {
+	// 			const editor = getEditor(offense.uri);
+
+	// 			if (editor) {
+	// 				fixInline(offense, editor);
+	// 			}
+	// 		},
+	// 	),
+	// );
+
+	// subscriptions.push(
+	// 	vscode.commands.registerCommand("linter.openUrl", (url: string) => {
+	// 		vscode.env.openExternal(vscode.Uri.parse(url));
+	// 	}),
+	// );
+
+	// subscriptions.push(
+	// 	vscode.commands.registerCommand(
+	// 		"linter.ignoreOffense",
+	// 		(offense: LinterOffense, type: string) => {
+	// 			runIgnore(offense, type);
+	// 		},
+	// 	),
+	// );
 
 	// 언어 서버 모듈
 	const serverModule = context.asAbsolutePath(
@@ -59,13 +140,13 @@ export function activate(context: ExtensionContext) {
 	// 클라이언트 시작, 서버도 이때 실행됨
 	client.start();
 
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	const server = require('../../server/src/server.ts');
+	// // eslint-disable-next-line @typescript-eslint/no-var-requires
+	// const server = require('../../server/src/server.ts');
 
 	// 명령 추가
 	const appendNewPattern = vscode.commands.registerCommand('cjp-linter.appendNewPattern', () => {
 		vscode.window.showInformationMessage('Append New Pattern from cjp-linter');
-		server.appendPattern(/\s{2,}/g);
+		// server.appendPattern(/\s{2,}/g);
 	});
 
 	context.subscriptions.push(appendNewPattern);
