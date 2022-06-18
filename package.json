@@ -17,6 +17,7 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
+		"onLanguage:plaintext",
 		"onLanguage:c",
 		"onLanguage:cpp",
 		"onLanguage:python",
