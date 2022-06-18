@@ -17,10 +17,17 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
-		"onLanguage:plaintext"
+		"onLanguage:plaintext",
+		"onCommand:cjp-linter.helloWorld"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
+		"commands": [
+			{
+				"command": "cjp-linter.helloWorld",
+				"title": "Hello World"
+			}
+		],
 		"configuration": {
 			"type": "object",
 			"title": "CJP Linter configuration",

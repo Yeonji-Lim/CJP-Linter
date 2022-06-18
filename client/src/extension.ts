@@ -5,6 +5,7 @@
 
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
+import * as vscode from 'vscode';
 
 import {
 	LanguageClient,
@@ -55,6 +56,13 @@ export function activate(context: ExtensionContext) {
 
 	// 클라이언트 시작, 서버도 이때 실행됨
 	client.start();
+
+	// 명령 추가
+	const disposable = vscode.commands.registerCommand('cjp-linter.helloWorld', () => {
+		vscode.window.showInformationMessage('Hello World!');
+	});
+
+	context.subscriptions.push(disposable);
 }
 
 export function deactivate(): Thenable<void> | undefined {
