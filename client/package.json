@@ -17,6 +17,8 @@
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.63.0",
-		"@vscode/test-electron": "^2.1.2"
+		"@vscode/test-electron": "^2.1.2",
+		"@types/lodash": "^4.14.170",
+		"vscode-linter-api": "github:fnando/vscode-linter-api"
 	}
 }

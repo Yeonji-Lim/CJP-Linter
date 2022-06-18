@@ -17,15 +17,18 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
-		"onLanguage:plaintext",
-		"onCommand:cjp-linter.helloWorld"
+		"onLanguage:c",
+		"onLanguage:cpp",
+		"onLanguage:python",
+		"onLanguage:java",
+		"onCommand:cjp-linter.appendNewPattern"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
 		"commands": [
 			{
-				"command": "cjp-linter.helloWorld",
-				"title": "Hello World"
+				"command": "cjp-linter.appendNewPattern",
+				"title": "Append New Pattern to Pattern List"
 			}
 		],
 		"configuration": {
@@ -63,10 +66,15 @@
 	"devDependencies": {
 		"@types/mocha": "^9.1.0",
 		"@types/node": "^16.11.7",
+		"@types/lodash": "^4.14.170",
 		"@typescript-eslint/eslint-plugin": "^5.19.0",
 		"@typescript-eslint/parser": "^5.19.0",
+		"vscode-linter-api": "github:fnando/vscode-linter-api",
 		"eslint": "^8.13.0",
 		"mocha": "^9.2.1",
 		"typescript": "^4.7.2"
+	},
+	"dependencies": {
+		"lodash": "^4.17.21"
 	}
 }

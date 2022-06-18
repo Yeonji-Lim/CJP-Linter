@@ -15,9 +15,11 @@ import {
 } from 'vscode-languageclient/node';
 
 let client: LanguageClient;
+let diagnosticCollection: vscode.DiagnosticCollection;
 
 export function activate(context: ExtensionContext) {
-	// 서버 모듈
+
+	// 언어 서버 모듈
 	const serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
 	);
@@ -38,8 +40,8 @@ export function activate(context: ExtensionContext) {
 
 	// Language Client를 제어할 옵션
 	const clientOptions: LanguageClientOptions = {
-		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'plaintext' }],
+
+		documentSelector: [{ scheme: 'file', language: 'java' }],
 		synchronize: {
 			// 워크스페이스에 있는 .clientirc 파일들을 변경하며 서버에게 파일이 변경되었음을 알림
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
@@ -57,12 +59,17 @@ export function activate(context: ExtensionContext) {
 	// 클라이언트 시작, 서버도 이때 실행됨
 	client.start();
 
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	const server = require('../../server/src/server.ts');
+
 	// 명령 추가
-	const disposable = vscode.commands.registerCommand('cjp-linter.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World!');
+	const appendNewPattern = vscode.commands.registerCommand('cjp-linter.appendNewPattern', () => {
+		vscode.window.showInformationMessage('Append New Pattern from cjp-linter');
+		server.appendPattern(/\s{2,}/g);
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(appendNewPattern);
+
 }
 
 export function deactivate(): Thenable<void> | undefined {

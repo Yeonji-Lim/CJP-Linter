@@ -21,6 +21,8 @@ import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 
+// import * as vscode from 'vscode';
+
 // 서버를 위한 연결 생성 : Node의 IPC 모듈 사용
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
@@ -96,6 +98,22 @@ const patternList: RegExp[] = [
 	/\b[A-Z]{2,}\b/g
 ];
 
+function exportTestFunc(): void {
+	console.log("test success!!");
+}
+
+function isExistPattern(pattern: RegExp): boolean {
+	for(const item in patternList) {
+		if (item == pattern.toString()) return true;
+	}
+	return false;
+}
+
+function addPattern(pattern: RegExp): void {
+	if(isExistPattern(pattern)) return;
+	patternList.push(pattern);
+}
+
 // 열려있는 모든 문서의 설정 캐시
 const documentSettings: Map<string, Thenable<ExampleSettings>> = new Map();
 
@@ -130,7 +148,6 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	return result;
 }
 
-
 // 문서가 닫히면 해당 문서는 문서 설정에서 삭제
 documents.onDidClose(e => {
 	documentSettings.delete(e.document.uri);
@@ -142,6 +159,8 @@ documents.onDidChangeContent(async change => {
 	validateTextDocument(textDocument);
 });
 
+// let diagnosticCollection: vscode.DiagnosticCollection;
+
 // 문서를 주어진 패턴으로 진단
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// In this simple example we get the settings for every validate run.
@@ -149,6 +168,10 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	// The validator creates diagnostics
 	const text = textDocument.getText();
+
+	// diagnosticCollection = vscode.language.createDiagnosticCollection('java');
+
+
 	let m: RegExpExecArray | null;
 
 	let problems = 0;
@@ -164,7 +187,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 					start: textDocument.positionAt(m.index),
 					end: textDocument.positionAt(m.index + m[0].length)
 				},
-				message: `${m[0]} is all uppercase.`,
+				message: `${m[0]}는 pattern ${pattern}에 맞지 않습니다.`,
 				source: 'ex'
 			};
 			if (hasDiagnosticRelatedInformationCapability) {
@@ -189,6 +212,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 			diagnostics.push(diagnostic);
 		}
 	}
+
 	
 	// 진단들을 연결로 다시 보냄
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
@@ -241,3 +265,6 @@ connection.onCompletionResolve(
 documents.listen(connection);
 
 connection.listen();
+
+module.exports.test = exportTestFunc;
+module.exports.appendPattern = addPattern;
