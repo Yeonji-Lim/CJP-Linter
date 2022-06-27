@@ -1,10 +1,12 @@
-# LSP Example
+# CJP Linter
 
-Heavily documented sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+Used sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+
+Used sample code for https://github.com/fnando/vscode-linter
 
 ## Functionality
 
-This Language Server works for plain text file. It has the following language features:
+This Language Server works for java file. It has the following language features:
 - Completions
 - Diagnostics regenerated on each file change or configuration change
 
